@@ -7,6 +7,7 @@
 #ifndef E57_H
 #define E57_H
 
+#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>    								//Contains the structure of XYZ point data
 #include "E57/E57Foundation.h"   							//API of E57
 #include "E57/E57Simple.h" 
@@ -26,7 +27,7 @@ class E57{
 	
 	private:
 		//Used for discovering Max and Minimum of a Pointcloud, before saving it in E57: this is an info required by E57 file format
-		inline void findMaxMin(pcl::PointCloud<pcl::PointXYZI>::Ptr &pointcloud, StructMaxMin *vector){
+        inline void findMaxMin(pcl::PointCloud<pcl::PointXYZI>::Ptr &pointcloud, StructMaxMin *vector){
 
 			//setup of max and min for the 4 values of PointCloud structure
 			vector[0].max = pointcloud->points[0].x;
@@ -34,9 +35,9 @@ class E57{
 			vector[1].max = pointcloud->points[0].y;
 			vector[1].min = pointcloud->points[0].y;
 			vector[2].max = pointcloud->points[0].z;
-			vector[2].min = pointcloud->points[0].z;
-			vector[3].max = pointcloud->points[0].intensity;
-			vector[3].min = pointcloud->points[0].intensity;
+            vector[2].min = pointcloud->points[0].z;
+            vector[3].max = pointcloud->points[0].intensity;
+            vector[3].min = pointcloud->points[0].intensity;
 			
 			for(size_t j = 0; j < pointcloud->points.size(); j++)
 				{
@@ -70,16 +71,16 @@ class E57{
 						vector[2].min = pointcloud->points[j].z;
 					}
 					
-					/* Block for Intensiti value */
-					if(vector[3].max < pointcloud->points[j].intensity)
-					{
-						vector[3].max = pointcloud->points[j].intensity;
-					}
-					else if(vector[3].min > pointcloud->points[j].intensity)
-					{
-						vector[3].min = pointcloud->points[j].intensity;
-					}
-					
+                    /* Block for Intensiti value */
+                    if(vector[3].max < pointcloud->points[j].intensity)
+                    {
+                        vector[3].max = pointcloud->points[j].intensity;
+                    }
+                    else if(vector[3].min > pointcloud->points[j].intensity)
+                    {
+                        vector[3].min = pointcloud->points[j].intensity;
+                    }
+
 				}
 				cout<<"Values found: "<<endl;
 				for(int i=0;i<4;i++){
@@ -133,17 +134,17 @@ class E57{
 				/// Call subroutine in this file to print the points
 				StructureNode proto(points.prototype());
 			    /// The prototype should have a field named either "cartesianX" or "sphericalRange".
-			    if (proto.isDefined("cartesianX") && proto.isDefined("cartesianY") && proto.isDefined("cartesianZ") && proto.isDefined("intensity")) {
+                if (proto.isDefined("cartesianX") && proto.isDefined("cartesianY") && proto.isDefined("cartesianZ")) {
 			        /// Make a list of buffers to receive the xyz values.
 			        vector<SourceDestBuffer> destBuffers;
 					float *x = new float[points.childCount()];
 					float *y = new float[points.childCount()];
-					float *z = new float[points.childCount()];
-					int *intensity = new int[points.childCount()];
+                    float *z = new float[points.childCount()];
+                    int *intensity = new int[points.childCount()];
 			        destBuffers.push_back(SourceDestBuffer(imf, "cartesianX", x, points.childCount(), true));
 			        destBuffers.push_back(SourceDestBuffer(imf, "cartesianY", y, points.childCount(), true));
 			        destBuffers.push_back(SourceDestBuffer(imf, "cartesianZ", z, points.childCount(), true));
-			        destBuffers.push_back(SourceDestBuffer(imf, "intensity", intensity, points.childCount(), true));
+                    //destBuffers.push_back(SourceDestBuffer(imf, "intensity", intensity, points.childCount(), true));
 			        /// Create a reader of the points CompressedVector, try to read first block of N points
 			        /// Each call to reader.read() will fill the xyz buffers until the points are exhausted.
 			        CompressedVectorReader reader = points.reader(destBuffers);
@@ -155,8 +156,7 @@ class E57{
 						
 						pointcloud->points[j].x = x[j];	//seems E57 is expressed in millimeters
 						pointcloud->points[j].y = y[j];	//seems E57 is expressed in millimeters
-						pointcloud->points[j].z = z[j];	//seems E57 is expressed in millimeters
-						pointcloud->points[j].intensity = intensity[j];
+                        pointcloud->points[j].z = z[j];	//seems E57 is expressed in millimeters
 						
 						if(pointcloud->points[j].x > 10000 || pointcloud->points[j].y > 10000 || pointcloud->points[j].z > 10000){
 						pointcloud->points[j].x = pointcloud->points[j].x  * 0.001;
@@ -270,8 +270,8 @@ class E57{
 	        proto.set("rowIndex",    IntegerNode(imf, 0, 0, 1));
 	        proto.set("columnIndex", IntegerNode(imf, 0, 0, 1));
 	        proto.set("returnIndex", IntegerNode(imf, 0, 0, 0));
-	        proto.set("returnCount", IntegerNode(imf, 1, 1, 1));
-	        proto.set("intensity",   IntegerNode(imf, vector[3].min, vector[3].min, vector[3].max));
+            proto.set("returnCount", IntegerNode(imf, 1, 1, 1));
+            proto.set("intensity",   IntegerNode(imf, vector[3].min, vector[3].min, vector[3].max));
 	
 	        /// Make empty codecs vector for use in creating points CompressedVector.
 	        /// If this vector is empty, it is assumed that all fields will use the BitPack codec.
@@ -374,8 +374,8 @@ class E57{
 	            delete[] rowIndex;
 	            delete[] columnIndex;
 	            delete[] returnIndex;
-	            delete[] returnCount;
-	            delete[] intensity;
+                delete[] returnCount;
+                delete[] intensity;
 	           
 	        }
 	

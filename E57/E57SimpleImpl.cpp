@@ -77,7 +77,7 @@
 #else
 #  error "no supported OS platform defined"
 #endif
-#include <math.h>
+
 #include <sstream>
 #include "E57SimpleImpl.h"
 #include "time_conversion.h"
