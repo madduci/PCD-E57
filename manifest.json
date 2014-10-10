@@ -1,0 +1,15 @@
+{
+    "name": "com.ubuntu.developer.username.pcd-e57",
+    "description": "description of PCD-E57",
+    "framework": "ubuntu-sdk-14.04-qml-dev1",
+    "architecture": "all",
+    "title": "PCD-E57",
+    "hooks": {
+        "PCD-E57": {
+            "apparmor": "PCD-E57.json",
+            "desktop": "PCD-E57.desktop"
+        }
+    },
+    "version": "0.1",
+    "maintainer": ""
+}

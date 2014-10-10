@@ -1,6 +1,6 @@
 //*********************** Last revision of this file ***********************
 //$Author:: Michele Adduci
-//$LastChangedDate:: 11/07/2012
+//$LastChangedDate:: 10/10/2014
 //**************************************************************************
 //
 
@@ -8,15 +8,19 @@
 #define E57_H
 
 #include <pcl/point_cloud.h>
-#include <pcl/point_types.h>    								//Contains the structure of XYZ point data
-#include "E57/E57Foundation.h"   							//API of E57
-#include "E57/E57Simple.h" 
+#include <pcl/point_types.h>
 #include <iostream>
-#include <time.h>
+#include <ctime>
 #include <string>
+//Contains the structure of XYZ point data
+#include "E57/E57Foundation.h"  //libE57 API
+#include "E57/E57Simple.h"
 
 using namespace std;
 using namespace e57;
+
+typedef pcl::PointXYZI P_XYZ;
+typedef pcl::PointCloud<P_XYZ>::Ptr PtrXYZ;
 
 struct StructMaxMin{
 	float max;
@@ -27,7 +31,7 @@ class E57{
 	
 	private:
 		//Used for discovering Max and Minimum of a Pointcloud, before saving it in E57: this is an info required by E57 file format
-        inline void findMaxMin(pcl::PointCloud<pcl::PointXYZI>::Ptr &pointcloud, StructMaxMin *vector){
+        inline void findMaxMin(PtrXYZ &pointcloud, StructMaxMin *vector){
 
 			//setup of max and min for the 4 values of PointCloud structure
 			vector[0].max = pointcloud->points[0].x;
@@ -36,63 +40,50 @@ class E57{
 			vector[1].min = pointcloud->points[0].y;
 			vector[2].max = pointcloud->points[0].z;
             vector[2].min = pointcloud->points[0].z;
-            vector[3].max = pointcloud->points[0].intensity;
-            vector[3].min = pointcloud->points[0].intensity;
 			
-			for(size_t j = 0; j < pointcloud->points.size(); j++)
-				{
-					/* Block for X coordinate */
-					if(vector[0].max < pointcloud->points[j].x)
-					{
-						vector[0].max = pointcloud->points[j].x;
-					}
-					else if(vector[0].min > pointcloud->points[j].x)
-					{
-						vector[0].min = pointcloud->points[j].x;
-					}
-					
-					/* Block for Y coordinate */
-					if(vector[1].max < pointcloud->points[j].y)
-					{
-						vector[1].max = pointcloud->points[j].y;
-					}
-					else if(vector[1].min > pointcloud->points[j].y)
-					{
-						vector[1].min = pointcloud->points[j].y;
-					}
-					
-					/* Block for Z coordinate */
-					if(vector[2].max < pointcloud->points[j].z)
-					{
-						vector[2].max = pointcloud->points[j].z;
-					}
-					else if(vector[2].min > pointcloud->points[j].z)
-					{
-						vector[2].min = pointcloud->points[j].z;
-					}
-					
-                    /* Block for Intensiti value */
-                    if(vector[3].max < pointcloud->points[j].intensity)
-                    {
-                        vector[3].max = pointcloud->points[j].intensity;
-                    }
-                    else if(vector[3].min > pointcloud->points[j].intensity)
-                    {
-                        vector[3].min = pointcloud->points[j].intensity;
-                    }
+            for(auto &point:pointcloud->points)
+            {
+                /* Block for X coordinate */
+                if(vector[0].max < point.x)
+                {
+                    vector[0].max = point.x;
+                }
+                else if(vector[0].min > point.x)
+                {
+                    vector[0].min = point.x;
+                }
 
-				}
-				cout<<"Values found: "<<endl;
-				for(int i=0;i<4;i++){
-					cout<<i<<"Max Value: "<<vector[i].max<<" Min Value: "<<vector[i].min<<endl;
-					
-				}
+                /* Block for Y coordinate */
+                if(vector[1].max < point.y)
+                {
+                    vector[1].max = point.y;
+                }
+                else if(vector[1].min > point.y)
+                {
+                    vector[1].min = point.y;
+                }
+
+                /* Block for Z coordinate */
+                if(vector[2].max < point.z)
+                {
+                    vector[2].max = point.z;
+                }
+                else if(vector[2].min > point.z)
+                {
+                    vector[2].min = point.z;
+                }
+            }
+            cout<<"Values found: "<<endl;
+            for(int i=0; i<3; ++i)
+            {
+                cout << i << "Max Value: " << vector[i].max << " Min Value: " << vector[i].min << endl;
+            }
 		}
-	
 
 	public:
-		
-		inline int openE57(const std::string &filename, pcl::PointCloud<pcl::PointXYZI>::Ptr &pointcloud, float &scale_factor){
+        E57(){}
+        ~E57(){}
+        inline int openE57(const std::string &filename, PtrXYZ &pointcloud, float &scale_factor){
 			try{
 				ImageFile imf(filename, "r");
 			    StructureNode root = imf.root();
@@ -140,57 +131,60 @@ class E57{
 					float *x = new float[points.childCount()];
 					float *y = new float[points.childCount()];
                     float *z = new float[points.childCount()];
-                    int *intensity = new int[points.childCount()];
-			        destBuffers.push_back(SourceDestBuffer(imf, "cartesianX", x, points.childCount(), true));
+                    destBuffers.push_back(SourceDestBuffer(imf, "cartesianX", x, points.childCount(), true));
 			        destBuffers.push_back(SourceDestBuffer(imf, "cartesianY", y, points.childCount(), true));
 			        destBuffers.push_back(SourceDestBuffer(imf, "cartesianZ", z, points.childCount(), true));
                     //destBuffers.push_back(SourceDestBuffer(imf, "intensity", intensity, points.childCount(), true));
 			        /// Create a reader of the points CompressedVector, try to read first block of N points
 			        /// Each call to reader.read() will fill the xyz buffers until the points are exhausted.
-			        CompressedVectorReader reader = points.reader(destBuffers);
-			        unsigned gotCount = reader.read();
-			        
+                    CompressedVectorReader reader = points.reader(destBuffers);
+                    if(reader.read() <= 0)
+                    {
+                        cout << "Failed to read E57 file" << endl;
+                        return -1;
+                    }
 			        float min_scale = 100;	//assigned an high value before starting.
-			        
-			        for(size_t j = 0; j < pointcloud->points.size(); j++){
+                    auto j = 0;
+                    for(auto &point:pointcloud->points){
 						
-						pointcloud->points[j].x = x[j];	//seems E57 is expressed in millimeters
-						pointcloud->points[j].y = y[j];	//seems E57 is expressed in millimeters
-                        pointcloud->points[j].z = z[j];	//seems E57 is expressed in millimeters
+                        point.x = x[j];	//seems E57 is expressed in millimeters
+                        point.y = y[j];	//seems E57 is expressed in millimeters
+                        point.z = z[j];	//seems E57 is expressed in millimeters
 						
-						if(pointcloud->points[j].x > 10000 || pointcloud->points[j].y > 10000 || pointcloud->points[j].z > 10000){
-						pointcloud->points[j].x = pointcloud->points[j].x  * 0.001;
-						pointcloud->points[j].y = pointcloud->points[j].y  * 0.001;
-						pointcloud->points[j].z = pointcloud->points[j].z  * 0.001;
-						if(min_scale > 0.001)
-							min_scale = 0.001;
+                        if(point.x > 10000 || point.y > 10000 || point.z > 10000)
+                        {
+                            point.x = point.x  * 0.001;
+                            point.y = point.y  * 0.001;
+                            point.z = point.z  * 0.001;
+                            if(min_scale > 0.001)
+                                min_scale = 0.001;
 						}
-						if(pointcloud->points[j].x > 1000 || pointcloud->points[j].y > 1000 || pointcloud->points[j].z > 1000){
-							pointcloud->points[j].x = pointcloud->points[j].x  * 0.01;
-							pointcloud->points[j].y = pointcloud->points[j].y  * 0.01;
-							pointcloud->points[j].z = pointcloud->points[j].z  * 0.01;
+                        if(point.x > 1000 || point.y > 1000 || point.z > 1000){
+                            point.x = point.x  * 0.01;
+                            point.y = point.y  * 0.01;
+                            point.z = point.z  * 0.01;
 							if(min_scale > 0.01)
 								min_scale = 0.01;
 						}
-						else if(pointcloud->points[j].x > 100 || pointcloud->points[j].y > 100 || pointcloud->points[j].z > 100){
-							pointcloud->points[j].x = pointcloud->points[j].x  * 0.1;	
-							pointcloud->points[j].y = pointcloud->points[j].y  * 0.1;
-							pointcloud->points[j].z = pointcloud->points[j].z  * 0.1;
+                        else if(point.x > 100 || point.y > 100 || point.z > 100){
+                            point.x = point.x  * 0.1;
+                            point.y = point.y  * 0.1;
+                            point.z = point.z  * 0.1;
 							if(min_scale > 0.1)
 								min_scale = 0.1;
 						}
-						else if(pointcloud->points[j].x > 10 || pointcloud->points[j].y > 10 || pointcloud->points[j].z > 10){
-							pointcloud->points[j].x = pointcloud->points[j].x  * 1.0;	
-							pointcloud->points[j].y = pointcloud->points[j].y  * 1.0;
-							pointcloud->points[j].z = pointcloud->points[j].z  * 1.0;
+                        else if(point.x > 10 || point.y > 10 || point.z > 10){
+                            point.x = point.x  * 1.0;
+                            point.y = point.y  * 1.0;
+                            point.z = point.z  * 1.0;
 							if(min_scale > 1.0)
 								min_scale = 1.0;
 						}
+                        j++;
 					}
 					scale_factor = min_scale;
 					reader.close();
-					imf.close();
-					
+                    imf.close();
 					return 1;
 				}
 				else {
@@ -200,12 +194,12 @@ class E57{
 				}
 				
 			} catch(E57Exception& ex){
-				cout<<"Error during reading file."<<endl;
-				return 0;
+                cout << "Error during reading file: " << ex.what() << endl;
+                return -1;
 			}
-	}
+        }
 	
-		inline int saveE57File(const std::string &filename, pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud, float &scale_factor, int index = 0){
+        inline int saveE57File(const std::string &filename, PtrXYZ &cloud, float &scale_factor, int index = 0){
 		try {
 	        /// Open new file for writing, get the initialized root node (a Structure).
 	        /// Path name: "/"
@@ -213,8 +207,8 @@ class E57{
 	        ImageFile imf(filename, "w");
 	        StructureNode root = imf.root();
 	
-	        /// Register extension with URI=www.example.com/DemoExtension and prefix=demo
-	        //~ imf.extensionsAdd("Be3De", "https://www.example.com/DemoExtension");
+            /// Register extension with URI=www.example.com/DemoExtension and prefix=demo
+            //~ imf.extensionsAdd("Your Company", "https://www.example.com/DemoExtension");
 	
 	        /// Set per-file properties.
 	        /// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
@@ -260,7 +254,7 @@ class E57{
 	        /// This prototype will be used in creating the points CompressedVector.
 	        /// Using this proto in a CompressedVector will define path names like:
 	        ///      "/data3D/0/points/0/cartesianX"
-	        StructMaxMin vector[4];
+            StructMaxMin vector[3];
 	        findMaxMin(cloud, vector);
 	        StructureNode proto = StructureNode(imf);
 	        proto.set("cartesianX",  ScaledIntegerNode(imf, (double)vector[0].min, (double)vector[0].min, (double)vector[0].max, (double)scale_factor, 0));
@@ -271,8 +265,7 @@ class E57{
 	        proto.set("columnIndex", IntegerNode(imf, 0, 0, 1));
 	        proto.set("returnIndex", IntegerNode(imf, 0, 0, 0));
             proto.set("returnCount", IntegerNode(imf, 1, 1, 1));
-            proto.set("intensity",   IntegerNode(imf, vector[3].min, vector[3].min, vector[3].max));
-	
+
 	        /// Make empty codecs vector for use in creating points CompressedVector.
 	        /// If this vector is empty, it is assumed that all fields will use the BitPack codec.
 	        VectorNode codecs = VectorNode(imf, true);
@@ -338,13 +331,12 @@ class E57{
 	        int32_t *rowIndex = new int32_t[N];
 	        int32_t *columnIndex = new int32_t[N];
 	        int32_t *returnIndex = new int32_t[N];
-	        int32_t *returnCount = new int32_t[N];
-	        int32_t *intensity = new int32_t[N];
-	        for (size_t j = 0; j < N; j++){
+            int32_t *returnCount = new int32_t[N];
+            for (auto j = 0; j < N; j++)
+            {
 				cartesianX[j] = cloud->points[j].x;	
 				cartesianY[j] = cloud->points[j].y;	
-				cartesianZ[j] = cloud->points[j].z;	
-				intensity[j] = cloud->points[j].intensity;
+                cartesianZ[j] = cloud->points[j].z;
 				cartesianInvalidState[j] = 0;
 				rowIndex[j] = 0;
 				columnIndex[j] = 0;
@@ -359,8 +351,7 @@ class E57{
 	        sourceBuffers.push_back(SourceDestBuffer(imf, "rowIndex",    rowIndex,    N, true));
 	        sourceBuffers.push_back(SourceDestBuffer(imf, "columnIndex", columnIndex, N, true));
 	        sourceBuffers.push_back(SourceDestBuffer(imf, "returnIndex", returnIndex, N, true));
-	        sourceBuffers.push_back(SourceDestBuffer(imf, "returnCount", returnCount, N, true));
-	        sourceBuffers.push_back(SourceDestBuffer(imf, "intensity",   intensity,   N, true));
+            sourceBuffers.push_back(SourceDestBuffer(imf, "returnCount", returnCount, N, true));
 			cout << "Source Buffers prepared"<< endl;
 	        /// Write source buffers into CompressedVector
 	        {
@@ -375,8 +366,6 @@ class E57{
 	            delete[] columnIndex;
 	            delete[] returnIndex;
                 delete[] returnCount;
-                delete[] intensity;
-	           
 	        }
 	
 	        imf.close();
@@ -389,9 +378,7 @@ class E57{
 	    } 
 		
 		return 1;
-		}
-		
-		
+		}	
 };
 
 		

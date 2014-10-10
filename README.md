@@ -12,4 +12,4 @@ Description: E57 reader and converter of point clouds, which are downscaled and 
 
 THIS IS ONLY A DEMONSTRATION OF CONVERSION. THE SOFTWARE IS PROVIDED "AS-IS"
 
-TESTED ON WINDOWS 7 x64 + VS 2010 and Ubuntu 12.04 x64 with build-essentials
+TESTED ON WINDOWS 7 x64 + VS 2010 and Ubuntu 14.04 x64 with build-essentials and PCL git-master (1.7.2)

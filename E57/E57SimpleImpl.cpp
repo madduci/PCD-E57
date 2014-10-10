@@ -127,7 +127,7 @@ double e57::GetGPSTime(void)
 #ifdef _C_TIMECONV_H_
 
 unsigned short     utc_year;     //!< Universal Time Coordinated    [year]
-unsigned char      utc_month;    //!< Universal Time Coordinated    [1-12 months] 
+unsigned char      utc_month;    //!< Universal Time Coordinated    [1-12 months]
 unsigned char      utc_day;      //!< Universal Time Coordinated    [1-31 days]
 unsigned char      utc_hour;     //!< Universal Time Coordinated    [hours]
 unsigned char      utc_minute;   //!< Universal Time Coordinated    [minutes]
@@ -138,7 +138,7 @@ unsigned short     gps_week;     //!< GPS week (0-1024+)            [week]
 double             gps_tow;	  //!< GPS time of week (0-604800.0) [s]
 
 BOOL ret = TIMECONV_GetSystemTime(&utc_year, &utc_month, &utc_day, &utc_hour, &utc_minute, &utc_seconds,
-	&utc_offset, &julian_date, &gps_week, &gps_tow);
+    &utc_offset, &julian_date, &gps_week, &gps_tow);
 
 double gpsTime = (gps_week * 604800.) + gps_tow;
 
@@ -265,31 +265,31 @@ double	e57::GetGPSDateTimeFromUTC(
 	)
 {
 #ifdef _C_TIMECONV_H_
- 	double             julian_date;  //!< Number of days since noon Universal Time Jan 1, 4713 BCE (Julian calendar) [days]
-	unsigned char      utc_offset;   //!< Integer seconds that GPS is ahead of UTC time, always positive  
-	unsigned short     gps_week;     //!< GPS week (0-1024+)            [week]
+    double             julian_date;  //!< Number of days since noon Universal Time Jan 1, 4713 BCE (Julian calendar) [days]
+    unsigned char      utc_offset;   //!< Integer seconds that GPS is ahead of UTC time, always positive
+    unsigned short     gps_week;     //!< GPS week (0-1024+)            [week]
 	double             gps_tow;	  //!< GPS time of week (0-604800.0) [s]
 
-	BOOL result = TIMECONV_GetJulianDateFromUTCTime(
-	    utc_year,
-		utc_month,
-		utc_day,
-		utc_hour,
-		utc_minute,
-		utc_seconds,
-		&julian_date );
- 
-	result = TIMECONV_DetermineUTCOffset(
-		julian_date,
-		&utc_offset );
- 
-	result = TIMECONV_GetGPSTimeFromJulianDate(
-		julian_date,
-		utc_offset,
-		&gps_week,
-		&gps_tow );
+    BOOL result = TIMECONV_GetJulianDateFromUTCTime(
+        utc_year,
+        utc_month,
+        utc_day,
+        utc_hour,
+        utc_minute,
+        utc_seconds,
+        &julian_date );
 
-	double gpsTime = (gps_week * 604800.) + gps_tow;
+    result = TIMECONV_DetermineUTCOffset(
+        julian_date,
+        &utc_offset );
+
+    result = TIMECONV_GetGPSTimeFromJulianDate(
+        julian_date,
+        utc_offset,
+        &gps_week,
+        &gps_tow );
+
+    double gpsTime = (gps_week * 604800.) + gps_tow;
 
 #elif defined(WIN32)
 	SYSTEMTIME	sysTim;
@@ -321,32 +321,32 @@ void	e57::GetUTCFromGPSDateTime(
 	)
 {
 #ifdef _C_TIMECONV_H_
-	unsigned short     utc_year;     //!< Universal Time Coordinated    [year]
-	unsigned char      utc_month;    //!< Universal Time Coordinated    [1-12 months] 
-	unsigned char      utc_day;      //!< Universal Time Coordinated    [1-31 days]
-	unsigned char      utc_hour;     //!< Universal Time Coordinated    [hours]
-	unsigned char      utc_minute;   //!< Universal Time Coordinated    [minutes]
- 	unsigned short     gps_week;     //!< GPS week (0-1024+)            [week]
-	double             gps_tow;	  //!< GPS time of week (0-604800.0) [s]
+    unsigned short     utc_year;     //!< Universal Time Coordinated    [year]
+    unsigned char      utc_month;    //!< Universal Time Coordinated    [1-12 months]
+    unsigned char      utc_day;      //!< Universal Time Coordinated    [1-31 days]
+    unsigned char      utc_hour;     //!< Universal Time Coordinated    [hours]
+    unsigned char      utc_minute;   //!< Universal Time Coordinated    [minutes]
+    unsigned short     gps_week;     //!< GPS week (0-1024+)            [week]
+    double             gps_tow;	  //!< GPS time of week (0-604800.0) [s]
 
 	gps_week = ((int)floor(gpsTime))/604800;
-	gps_tow = gpsTime - gps_week * 604800.;
+    gps_tow = gpsTime - gps_week * 604800.;
 
-	BOOL result = TIMECONV_GetUTCTimeFromGPSTime(
-		gps_week,
-		gps_tow,
-		&utc_year,
-		&utc_month,
-		&utc_day,
-		&utc_hour,
-		&utc_minute,
-		&utc_seconds);
+    BOOL result = TIMECONV_GetUTCTimeFromGPSTime(
+        gps_week,
+        gps_tow,
+        &utc_year,
+        &utc_month,
+        &utc_day,
+        &utc_hour,
+        &utc_minute,
+        &utc_seconds);
 
-	utc_Year = utc_year;
-	utc_Month = utc_month;
-	utc_Day = utc_day;
-	utc_Hour = utc_hour;
-	utc_Minute = utc_minute;
+    utc_Year = utc_year;
+    utc_Month = utc_month;
+    utc_Day = utc_day;
+    utc_Hour = utc_hour;
+    utc_Minute = utc_minute;
 
 #elif defined(WIN32)
 	SYSTEMTIME	sysTim;
@@ -687,7 +687,7 @@ int64_t ReaderImpl :: ReadImage2DNode(
 				transferred = count;
 			}
 			break;
-		}
+        }
 	};
 	return transferred;
 };
@@ -838,7 +838,7 @@ int64_t	ReaderImpl :: ReadImage2DData(
 			transferred = ReadImage2DNode(cylindricalRepresentation, imageType, pBuffer, start, count);
 		}
 		break;
-	};
+    };
 	return transferred;
 };
 
