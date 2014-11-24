@@ -12,4 +12,9 @@ Description: E57 reader and converter of point clouds, which are downscaled and 
 
 THIS IS ONLY A DEMONSTRATION OF CONVERSION. THE SOFTWARE IS PROVIDED "AS-IS"
 
-TESTED ON WINDOWS 7 x64 + VS 2010 and Ubuntu 14.04 x64 with build-essentials and PCL git-master (1.7.2)
+TESTED ON: 
+
+- Windows 7 x64 + VS 2010 
+- Ubuntu 14.04 x64 with PCL git-master (from https://github.com/PointCloudLibrary/pcl)
+- Ubuntu 14.04 x64 with libpcl-all (from ppa:v-launchpad-jochen-sprickerhof-de/pcl) (Codeship setup)
+
