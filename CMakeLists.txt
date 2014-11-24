@@ -82,8 +82,8 @@ endif (Xerces_FOUND)
 
 set(CDEFS "XERCES_STATIC_LIBRARY\;E57_REFIMPL_REVISION_ID=${${PROJECT_NAME}_TAG}\;")
 
-# find and setup PCL 1.7.2 for this project
-FIND_PACKAGE(PCL 1.7.2 REQUIRED)
+# find and setup PCL 1.6.0 for this project
+FIND_PACKAGE(PCL 1.6.0 REQUIRED)
 
 add_definitions(-DBOOST_ALL_NO_LIB -DXERCES_STATIC_LIBRARY)
 
