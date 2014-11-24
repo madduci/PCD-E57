@@ -1,5 +1,3 @@
-[ ![Codeship Status for blackibiza/PCD-E57](https://www.codeship.io/projects/8d1faa10-4893-0132-172f-26a9c11ac500/status)](https://www.codeship.io/projects/45906)
-
 PCD-E57
 =======
 
