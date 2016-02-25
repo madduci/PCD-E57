@@ -83,7 +83,7 @@ class E57{
 	public:
         E57(){}
         ~E57(){}
-        inline int openE57(const std::string &filename, PtrXYZ &pointcloud, float &scale_factor){
+        inline int openE57(const std::string &filename, PtrXYZ &pointcloud, float &scale_factor, int64_t& scanCount, Eigen::Matrix4f& mat4, int64_t scanIndex = 0){
 			try{
 				ImageFile imf(filename, "r");
 			    StructureNode root = imf.root();
@@ -104,16 +104,35 @@ class E57{
 				VectorNode data3D(n);
 			
 				/// Print number of children of data3D.  This is the number of scans in file.
-				int64_t scanCount = data3D.childCount();
+				scanCount = data3D.childCount();
 				//~ 
 				
-				if(scanCount == 0){
+				if(scanCount == 0 || scanIndex < 0 || scanIndex >= scanCount){
 					cout <<"File doesn't contain valid informations."<<endl;
 					return 0;
 				}
 				
 				/// Get scan from "/data3D", assume its a Structure (else get exception)
-				StructureNode scan(data3D.get(0));
+				StructureNode scan(data3D.get(scanIndex));
+				std::cout << scan.elementName() << std::endl;
+
+				StructureNode pose(scan.get("pose"));
+				StructureNode rotation(pose.get("rotation"));
+				StructureNode translation(pose.get("translation"));
+				float rx = FloatNode(rotation.get("x")).value();
+				float ry = FloatNode(rotation.get("y")).value();
+				float rz = FloatNode(rotation.get("z")).value();
+				float rw = FloatNode(rotation.get("w")).value();
+				float tx = FloatNode(translation.get("x")).value();
+				float ty = FloatNode(translation.get("y")).value();
+				float tz = FloatNode(translation.get("z")).value();
+				std::cout << tx << " " << ty << " " << tz << " " << rx << " " << ry << " " << rz << " " << rw << std::endl;
+
+				Eigen::Matrix3f mat3 = Eigen::Quaternionf(rw, rx, ry, rz).toRotationMatrix();
+				mat4 = Eigen::Matrix4f::Identity();
+				mat4.block(0,0,3,3) = mat3;
+				mat4.block(0,3,3,1) = Eigen::Vector3f(tx, ty, tz);
+
 				/// Get "points" field in scan.  Should be a CompressedVectorNode.
 				CompressedVectorNode points(scan.get("points"));
 				
