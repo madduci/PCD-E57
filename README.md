@@ -17,4 +17,5 @@ TESTED ON:
 - Windows 7 x64 + VS 2010 
 - Ubuntu 14.04 x64 with PCL git-master (from https://github.com/PointCloudLibrary/pcl)
 - Ubuntu 14.04 x64 with libpcl-all (from ppa:v-launchpad-jochen-sprickerhof-de/pcl) (Codeship setup)
+- (Docker) Ubuntu 18.04 x64 with PCL 1.9.1 (from https://github.com/PointCloudLibrary/pcl)
 

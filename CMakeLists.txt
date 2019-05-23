@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.9)
 
 #-----------------------------
 # Project Settings
@@ -6,13 +6,13 @@ cmake_minimum_required(VERSION 2.8.11)
 SET(PROJECTNAME "E57Converter")
 PROJECT(${PROJECTNAME} C CXX)
 SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
-SET( ${PROJECT_NAME}_PATCH_LEVEL 7 )
+SET( ${PROJECT_NAME}_MINOR_VERSION 2 )
+SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 SET( ${PROJECT_NAME}_VERSION_STRING
         ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL})
 SET(CMAKE_BUILD_TYPE Release)
 
-#Enables C++11 features
+# Enables C++11 features
 IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "-std=gnu++11")
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -20,17 +20,16 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 ENDIF()
 
 SET(CMAKE_COLOR_MAKEFILE ON)
+
 #-----------------------------
 # Define default destinations
 #-----------------------------
-
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 
 #-----------------------------
 # Enable Relative path
 #-----------------------------
-
-#don't skip the full RPATH for the build tree
+# don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 # when building, don't use the install RPATH already
 # (but later on when installing)
@@ -94,7 +93,7 @@ add_definitions(-DBOOST_ALL_NO_LIB -DXERCES_STATIC_LIBRARY)
 add_library( E57LIB
 	E57/E57Simple.h
 	E57/E57SimpleImpl.h
-        E57/E57Simple.cpp
+  E57/E57Simple.cpp
 	E57/E57SimpleImpl.cpp
 	E57/E57Foundation.h
 	E57/E57FoundationImpl.h
@@ -132,7 +131,7 @@ set(E57_SOURCES
 	E57/E57Foundation.cpp
 	E57/E57FoundationImpl.cpp
 	E57/time_conversion.c
-	)
+)
 	
 set(E57_INCLUDES 
 	E57/E57Simple.h
@@ -149,7 +148,8 @@ set(E57_INCLUDES
 # This is the list of source files that need to be compiled
 #--------------------------------------------------------------------------------
 SET( PROJECT_SRC
-  main.cpp 
+	main.cpp 
+	e57.cpp 
 )
 
 SET( PROJECT_HDRS

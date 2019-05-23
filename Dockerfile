@@ -25,17 +25,17 @@ RUN echo "Installing basic dependencies" && \
     rm -rf /tmp/* && \
     rm -rf /var/log/apt/*
 
-WORKDIR /code
+#WORKDIR /code
 
-RUN echo "Downloading PointCloudLibrary from GitHub" && \
-    git clone https://github.com/PointCloudLibrary/pcl.git /code/pcl
+#RUN echo "Downloading PointCloudLibrary from GitHub" && \
+#    git clone https://github.com/PointCloudLibrary/pcl.git /code/pcl
 
-RUN echo "Preparing to build ${PCL_VERSION}" && \
-    cd /code/pcl && \
-    git checkout tags/${PCL_VERSION} && \
-    mkdir build && \
-    cd build/ && \
-    cmake -D WITH_OPENNI=OFF -D WITH_OPENNI2=OFF -D WITH_QT=OFF .. && \
-    make -j4 && \
-    make install && \
-    echo "Installation of PCL completed"
+#RUN echo "Preparing to build ${PCL_VERSION}" && \
+#    cd /code/pcl && \
+#    git checkout ${PCL_VERSION} && \
+#    mkdir build && \
+#    cd build/ && \
+#    cmake -D WITH_OPENNI=OFF -D WITH_OPENNI2=OFF -D WITH_QT=OFF .. && \
+#    make -j4 && \
+#    make install && \
+#    echo "Installation of PCL completed"
