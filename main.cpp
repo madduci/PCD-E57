@@ -6,10 +6,17 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/transforms.h>
 
+//Contains the structure of XYZ point data
+#include "E57/E57Foundation.h" //libE57 API
+#include "E57/E57Simple.h"
+
 #include "e57.h"
 
 using namespace std;
 using namespace e57;
+
+typedef pcl::PointCloud<pcl::PointXYZI>::Ptr PtrXYZI;
+typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PtrXYZRGB;
 
 int loadData(int argc, char **argv, vector<string> &files)
 {
@@ -28,7 +35,7 @@ int loadData(int argc, char **argv, vector<string> &files)
 int main(int argc, char **argv)
 {
 	vector<string> filenames;
-	E57 e57;
+	E57<PtrXYZI> e57;
 	loadData(argc, argv, filenames);
 	// Check user input
 	if (filenames.empty())
@@ -37,11 +44,11 @@ int main(int argc, char **argv)
 		return (-1);
 	}
 
-	PtrXYZ cloud(new pcl::PointCloud<P_XYZ>);
-	PtrXYZ cloud_transformed(new pcl::PointCloud<P_XYZ>);
+	PtrXYZI cloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+	PtrXYZI cloud_transformed = boost::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
 
-	float scale_factor = 0;
-	for (size_t i = 0; i < filenames.size(); ++i)
+	float scale_factor = 0.0f;
+	for (auto i = 0; i < filenames.size(); ++i)
 	{
 		// Will be overwritten:
 		int64_t scanCount = 1;
@@ -60,7 +67,6 @@ int main(int argc, char **argv)
 			std::stringstream ss;
 			ss << "Scan-" << i << "-" << scanIndex << ".pcd";
 			cout << ss.str() << endl;
-			int n = 0;
 
 			pcl::io::savePCDFileASCII(ss.str(), *cloud_transformed);
 
