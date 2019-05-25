@@ -12,14 +12,11 @@ SET( ${PROJECT_NAME}_VERSION_STRING
         ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL})
 SET(CMAKE_BUILD_TYPE Release)
 
-# Enables C++11 features
-IF(CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "-std=gnu++11")
-ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  SET(CMAKE_CXX_FLAGS "-std=c++11")
+# Enables C++17 features
+IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	SET(CMAKE_CXX_FLAGS "-std=c++17 -Wall -Wpedantic")
 ENDIF()
 
-SET(CMAKE_COLOR_MAKEFILE ON)
 
 #-----------------------------
 # Define default destinations
@@ -153,7 +150,12 @@ SET( PROJECT_SRC
 )
 
 SET( PROJECT_HDRS
+	e57.h 
   e57.h 
+	e57.h 
+  e57.h 
+	e57.h 
+	utils.h 
 )
 
 INCLUDE_DIRECTORIES (
@@ -170,12 +172,12 @@ INCLUDE_DIRECTORIES(
 
 #--------------------------------------------------------------------------------
 #  CMake's way of creating an executable
-ADD_EXECUTABLE(e57_2_pcd
+ADD_EXECUTABLE(e57_converter
   ${PROJECT_SRC}
   ${PROJECT_HDRS}
 )
 
-TARGET_LINK_LIBRARIES ( e57_2_pcd
+TARGET_LINK_LIBRARIES ( e57_converter
     ${PCL_LIBRARIES}
     E57LIB
     ${XML_LIBRARIES}

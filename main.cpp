@@ -1,15 +1,16 @@
 //Last update: 10/10/2014
 
-#include <iostream>
 #include <vector>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/transforms.h>
-
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
 //Contains the structure of XYZ point data
 #include "E57/E57Foundation.h" //libE57 API
 #include "E57/E57Simple.h"
 
+#include "utils.h"
 #include "e57.h"
 
 using namespace std;
@@ -34,6 +35,13 @@ int loadData(int argc, char **argv, vector<string> &files)
 
 int main(int argc, char **argv)
 {
+	if (argc <= 1)
+	{
+		print_help();
+	}
+
+	parse_arguments(argc, argv);
+
 	vector<string> filenames;
 	E57<PtrXYZI> e57;
 	loadData(argc, argv, filenames);
