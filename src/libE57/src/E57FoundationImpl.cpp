@@ -75,7 +75,7 @@ using std::endl;
 using std::cerr;
 #endif
 
-#include "E57FoundationImpl.h"
+#include "e57/E57FoundationImpl.h"
 using namespace e57;
 //using namespace std;
 using std::cerr;

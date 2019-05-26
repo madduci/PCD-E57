@@ -803,8 +803,8 @@ DEALINGS IN THE SOFTWARE.
 #  error "no supported OS platform defined"
 #endif
 
-#include "E57Simple.h"
-#include "E57SimpleImpl.h"
+#include "e57/E57Simple.h"
+#include "e57/E57SimpleImpl.h"
 
 using namespace e57;
 using namespace std;

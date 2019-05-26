@@ -46,9 +46,9 @@ SUCH DAMAGE.
 #include <sys/timeb.h>
 #include <time.h>
 #include <math.h> /* for fmod() */
-#include "gnss_error.h"
-#include "time_conversion.h"
-#include "constants.h"
+#include "e57/gnss_error.h"
+#include "e57/time_conversion.h"
+#include "e57/constants.h"
 
 #ifndef WIN32 
   #define _CRT_SECURE_NO_DEPRECATE  
