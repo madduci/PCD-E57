@@ -7,11 +7,11 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
 //Contains the structure of XYZ point data
-#include "E57/E57Foundation.h" //libE57 API
-#include "E57/E57Simple.h"
+#include "e57/E57Foundation.h" //libE57 API
+#include "e57/E57Simple.h"
 
-#include "utils.h"
-#include "e57.h"
+#include "libconverter/utils.h"
+#include "libconverter/e57.h"
 
 using namespace std;
 using namespace e57;

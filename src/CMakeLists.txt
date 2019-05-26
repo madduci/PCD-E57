@@ -48,21 +48,19 @@ if(UNIX)
 endif(UNIX)
 
 # Include Boost as an imported target
-find_package(Boost REQUIRED)
+find_package(Boost 1.40.0 REQUIRED)
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY
     INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 
-# set(Xerces_USE_STATIC_LIBS On)
-
-# # find and setup PCL 1.6.0 for this project
-# find_package(PCL 1.6.0 REQUIRED)
-
-# add_definitions(-DBOOST_ALL_NO_LIB -DXERCES_STATIC_LIBRARY)
+find_package(PCL 1.6.0 REQUIRED)
+add_library(pcl INTERFACE IMPORTED)
+set_property(TARGET pcl PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES ${PCL_INCLUDE_DIRS})
 
 add_subdirectory(libE57)
-#add_subdirectory(libconverter)
-#add_subdirectory(converter)
+add_subdirectory(libconverter)
+add_subdirectory(converter)
 
 #--------------------------------------------------------------------------------
 # Building libE57

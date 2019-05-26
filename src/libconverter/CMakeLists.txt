@@ -1,152 +1,39 @@
-cmake_minimum_required(VERSION 3.9)
 
 #-----------------------------
-# Project Settings
+# Project Settigs 
 #-----------------------------
-set(PROJECTNAME "E57Converter")
-project(${PROJECTNAME} C CXX)
-set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-set( ${PROJECT_NAME}_MINOR_VERSION 2 )
-set( ${PROJECT_NAME}_PATCH_LEVEL 0 )
-set( ${PROJECT_NAME}_VERSION_STRING
-        ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL})
-set(CMAKE_BUILD_TYPE Release)
-
-#-----------------------------
-# Define default destinations
-#-----------------------------
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-
-#-----------------------------
-# Enable Relative path
-#-----------------------------
-# don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-# when building, don't use the install RPATH already
-# (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# the RPATH to be used when installing, but only if it's not a system directory
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-if("${isSystemDir}" STREQUAL "-1")
-   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-endif("${isSystemDir}" STREQUAL "-1")
+project(libconverter VERSION 0.2.0 LANGUAGES CXX)
 
 message( STATUS "-------------------------------------------------------------------------------" )
-message( STATUS "INSTALL PATH")
-message( STATUS "-------------------------------------------------------------------------------" )
-message( STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-message( STATUS "CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
-
-
-message( STATUS "-------------------------------------------------------------------------------" )
-message( STATUS "Looking for Dependencies")
+message( STATUS "Building libconverter")
 message( STATUS "-------------------------------------------------------------------------------" )
 
-# Private Xerces find module
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-if(UNIX)
-include(${CMAKE_MODULE_PATH}FindXerces.cmake)
-include(${CMAKE_MODULE_PATH}FindICU.cmake)
-endif(UNIX)
-
-set(Xerces_USE_STATIC_LIBS On)
-find_package(Xerces REQUIRED)
-if(Xerces_FOUND)
-	set(XML_LIBRARIES ${Xerces_LIBRARY})
-	set(XML_INCLUDE_DIRS ${Xerces_INCLUDE_DIR})
-	message(STATUS "Xerces Library (include: ${Xerces_LIBRARY})")
-	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	    add_definitions(-DLINUX)
-	    find_package(ICU REQUIRED)
-	    set(XML_LIBRARIES ${XML_LIBRARIES} ${ICU_LIBRARIES})
-	    set(XML_INCLUDE_DIRS ${XML_INCLUDE_DIRS} ${ICU_INCLUDE_DIRS})
-	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-		add_definitions(-DWINDOWS)
-	endif()
-else (NOT Xerces_FOUND)
-	message(FATAL_ERROR "Xerces Library not found")
-endif (Xerces_FOUND)
-
-set(CDEFS "XERCES_STATIC_LIBRARY\;E57_REFIMPL_REVISION_ID=${${PROJECT_NAME}_TAG}\;")
-
-# find and setup PCL 1.6.0 for this project
-find_package(PCL 1.6.0 REQUIRED)
-
-add_definitions(-DBOOST_ALL_NO_LIB -DXERCES_STATIC_LIBRARY)
-
-#--------------------------------------------------------------------------------
-# Building libE57
-#--------------------------------------------------------------------------------
-
-add_library( e57 STATIC
-	E57/E57Simple.h
-	E57/E57SimpleImpl.h
-  E57/E57Simple.cpp
-	E57/E57SimpleImpl.cpp
-	E57/E57Foundation.h
-	E57/E57FoundationImpl.h
-	E57/E57Foundation.cpp
-	E57/E57FoundationImpl.cpp
-	E57/time_conversion.h
-	E57/time_conversion.c
-	E57/gnss_error.h
-	E57/basictypes.h
-	E57/constants.h
+# Define library target
+add_library(converter
+  src/e57.cpp
 )
+# Specify library properties
+target_include_directories(converter PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/libE57/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE src)
 
-set_target_properties( e57
-    PROPERTIES COMPILE_DEFINITIONS ${CDEFS}
-)
+set_target_properties(converter PROPERTIES CXX_STANDARD 17)
 
-set_property(TARGET e57 PROPERTY CXX_STANDARD 17)
+target_compile_options(converter PRIVATE -pedantic -Wall -Wextra -Wfloat-equal -O2)
 
-target_include_directories(e57 PRIVATE ${XML_INCLUDE_DIRS})
+target_link_libraries(converter e57 pcl boost)
 
-target_link_libraries ( e57
-    ${XML_LIBRARIES}
-)
+# 'make install' to the correct locations (provided by GNUInstallDirs).
+install(TARGETS converter EXPORT LibConverterConfig
+    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-#--------------------------------------------------------------------------------
-# This is the list of source files that need to be compiled
-#--------------------------------------------------------------------------------
-set( PROJECT_SRC
-	main.cpp 
-	e57.cpp 
-)
+# This makes the project importable from the install directory
+install(EXPORT LibConverterConfig DESTINATION share/libconverter/cmake)
 
-set( PROJECT_HDRS
-	e57.h 
-	utils.h 
-)
-
-include_directories (
-  # Look in the cmake build directory (some generated headers could be there)
-  ${CMAKE_CURRENT_BINARY_DIR} 
-)
-
-#for PointCloudLibrary too
-include_directories(
-    ${PCL_INCLUDE_DIRS}
-		${Boost_INCLUDE_DIR}
-)
-
-#--------------------------------------------------------------------------------
-#  CMake's way of creating an executable
-add_executable(e57_converter
-  ${PROJECT_SRC}
-	${PROJECT_HDRS}
-)
-
-set_property(TARGET e57_converter PROPERTY CXX_STANDARD 17)
-
-target_compile_options(e57_converter PRIVATE -pedantic -Wall -Wextra -Wfloat-equal -O2)
-
-target_link_libraries ( e57_converter
-    ${PCL_LIBRARIES}
-    ${XML_LIBRARIES}
-		${CMAKE_THREAD_LIBS_INIT}
-		e57
-)
+# This makes the project importable from the build directory
+export(TARGETS converter FILE LibConverterConfig.cmake)

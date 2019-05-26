@@ -1,6 +1,6 @@
 
 #-----------------------------
-# Project Settings
+# Project Settigs - TODO: Use ExternalProject_Add to get the package from SourceForge
 #-----------------------------
 project(libE57 VERSION 1.1.312 LANGUAGES CXX)
 
@@ -63,8 +63,6 @@ install(TARGETS e57 EXPORT E57Config
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # This makes the project importable from the install directory
-# Put config file in per-project dir (name MUST match), can also
-# just go into 'cmake'.
 install(EXPORT E57Config DESTINATION share/libE57/cmake)
 
 # This makes the project importable from the build directory

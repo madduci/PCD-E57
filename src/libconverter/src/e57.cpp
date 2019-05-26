@@ -1,10 +1,10 @@
-#include "e57.h"
+#include "libconverter/e57.h"
 
 #include <ctime>
 #include <iostream>
 //Contains the structure of XYZ point data
-#include "E57/E57Foundation.h" //libE57 API
-#include "E57/E57Simple.h"
+#include "e57/E57Foundation.h" //libE57 API
+#include "e57/E57Simple.h"
 
 using namespace std;
 using namespace e57;
