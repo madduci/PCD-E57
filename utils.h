@@ -1,5 +1,5 @@
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __E57_UTILS_H__
+#define __E57_UTILS_H__
 
 /*
 ************************ Last revision of this file ***********************
@@ -11,25 +11,17 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <utility>
+#include <stdexcept>
 
 #include <pcl/console/print.h>
 #include <pcl/console/parse.h>
-
-/*#ifdef __cpp_lib_filesystem
-#include <filesystem>
-using boost::filesystem = std::filesystem;
-#elif __cpp_lib_experimental_filesystem
-#include <experimental/filesystem>
-using boost::filesystem = std::experimental::filesystem;
-#else*/
 #include <boost/filesystem.hpp>
 
-//#endif
+namespace fs = boost::filesystem;
 
-constexpr int CMD_SPACE{20};
-constexpr int PARMS_SPACE{40};
-
-using boost::filesystem = std::experimental::filesystem;
+constexpr int CMD_SPACE{5};
+constexpr int PARMS_SPACE{30};
 
 constexpr auto print_helper = [](std::string cmd, std::string param, std::string description) {
     std::cout << std::right << setw(CMD_SPACE) << cmd
@@ -46,10 +38,9 @@ enum class FileType
     PCD,
     PLY,
     OCT
-}
+};
 
-std::string
-file_type_to_string(FileType t)
+[[nodiscard]] std::string file_type_to_string(FileType t)
 {
     switch (t)
     {
@@ -62,11 +53,11 @@ file_type_to_string(FileType t)
     case FileType::PLY:
         return "PLY";
     default:
-        return "UNKNOWN";
+        return "UNDEFINED";
     }
 }
 
-bool is_valid_extension(boost::filesystem::path &file_path, FileType ext)
+[[nodiscard]] bool is_valid_extension(fs::path &file_path, FileType ext)
 {
     assert(ext == FileType::E57 || ext == FileType::PCD || ext == FileType::OCT || ext == FileType::PLY);
     if (file_path.string().back() != '/' && file_path.string().back() != '\\')
@@ -79,7 +70,7 @@ bool is_valid_extension(boost::filesystem::path &file_path, FileType ext)
     return false;
 }
 
-FileType get_file_type(boost::filesystem::path &file_path)
+[[nodiscard]] FileType get_file_type(fs::path &file_path)
 {
     if (is_valid_extension(file_path, FileType::E57))
         return FileType::E57;
@@ -90,10 +81,19 @@ FileType get_file_type(boost::filesystem::path &file_path)
     else if (is_valid_extension(file_path, FileType::PLY))
         return FileType::PLY;
     else
-        return FileType::UNKNOWN;
+        return FileType::UNDEFINED;
 }
 
-void print_help()
+/**
+ * Check the supported type of conversion between input and output
+ */
+[[nodiscard]] bool are_input_output_valid_match(FileType inputExt, FileType outputExt)
+{
+    return (inputExt == FileType::E57 && outputExt == FileType::PCD) ||
+           (inputExt == FileType::PCD && outputExt == FileType::E57);
+}
+
+[[noreturn]] void print_help()
 {
     std::cout << "Options:" << '\n';
 
@@ -104,8 +104,8 @@ void print_help()
 
     std::cout << "Parmameters - convert:" << '\n';
 
-    print_helper("-src", "<sting>", "Input PointCloud file");
-    print_helper("-dst", "<sting>", "Output PointCloud file");
+    print_helper("-input", "<sting>", "Input PointCloud file");
+    print_helper("-output", "<sting>", "Output PointCloud file");
     print_helper("-res", "<float>", "Size for converting inputFile(from -src) to OutOfCoreOctreeFile(from -dst)");
     print_helper("-min", "<sting of tree floats>", "AABB min corner for converting inputFile(from -src) to OutOfCoreOctreeFile(from -dst). For example: -min \"-100 -100 -100\"");
     print_helper("-max", "<sting of tree floats>", "AABB max corner for converting inputFile(from -src) to OutOfCoreOctreeFile(from -dst). For example: -max \"100 100 100");
@@ -123,7 +123,7 @@ void print_help()
 
 void parse_arguments(int argc, char **argv)
 {
-    if (pcl::console::find_switch(argc, arg, "-h"))
+    if (pcl::console::find_switch(argc, argv, "-h"))
     {
         print_help();
         return;
@@ -131,19 +131,25 @@ void parse_arguments(int argc, char **argv)
 
     if (pcl::console::find_switch(argc, argv, "-convert"))
     {
-        std::string _src_file_path{""};
-        std::string _dst_file_path{""};
-        pcl::console::parse_argument(argc, argv, "-src", _src_file_path);
-        pcl::console::parse_argument(argc, argv, "-dst", _dst_file_path);
+        std::string _input_file_path{""};
+        std::string _output_file_path{""};
+        pcl::console::parse_argument(argc, argv, "-input", _input_file_path);
+        pcl::console::parse_argument(argc, argv, "-output", _output_file_path);
 
-        boost::filesystem::path src_file_path{_src_file_path};
-        boost::filesystem::path dst_file_path{_dst_file_path};
-        FileType srcFileType = get_file_type(src_file_path);
-        FileType dstFileType = get_file_type(dst_file_path);
+        fs::path input_file_path{_input_file_path};
+        fs::path output_file_path{_output_file_path};
+        
+        FileType input_file_type = get_file_type(input_file_path);
+        FileType output_file_type = get_file_type(output_file_path);
+        
+        if(!are_input_output_valid_match(input_file_type, output_file_type))
+        {
+            throw std::runtime_error{"Unsupported conversion from " + file_type_to_string(input_file_type) + " to " + file_type_to_string(output_file_type)};
+        }
 
-        std::cout << "Parmameters - src: " << src_file_path << std::endl;
-        std::cout << "Parmameters - dst: " << dst_file_path << std::endl;
+        std::cout << "Parmameters - input: " << input_file_path << std::endl;
+        std::cout << "Parmameters - ouput: " << output_file_path << std::endl;
     }
 }
 
-#endif //__UTILS_H__
+#endif //__E57_UTILS_H__

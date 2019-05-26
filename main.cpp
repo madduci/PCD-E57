@@ -19,7 +19,7 @@ using namespace e57;
 typedef pcl::PointCloud<pcl::PointXYZI>::Ptr PtrXYZI;
 typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PtrXYZRGB;
 
-int loadData(int argc, char **argv, vector<string> &files)
+[[deprecated]] int loadData(int argc, char **argv, vector<string> &files)
 {
 	std::string extension(".e57");
 	// Suppose the first argument is the actual test model
