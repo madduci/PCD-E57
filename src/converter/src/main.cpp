@@ -10,16 +10,17 @@
 #include "e57/E57Foundation.h" //libE57 API
 #include "e57/E57Simple.h"
 
-#include "libconverter/utils.h"
 #include "libconverter/e57.h"
 
-using namespace std;
+#include "ArgParser.h"
+
 using namespace e57;
+using namespace converter;
 
 typedef pcl::PointCloud<pcl::PointXYZI>::Ptr PtrXYZI;
 typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PtrXYZRGB;
 
-[[deprecated]] int loadData(int argc, char **argv, vector<string> &files)
+[[deprecated]] int loadData(int argc, char **argv, std::vector<string> &files)
 {
 	std::string extension(".e57");
 	// Suppose the first argument is the actual test model
@@ -35,20 +36,22 @@ typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PtrXYZRGB;
 
 int main(int argc, char **argv)
 {
-	if (argc <= 1)
+	app::ArgParser arg_parser{argc, argv};
+	auto parameters = arg_parser.getParameters();
+
+	std::cout << "Parameters size: " << parameters.size() << '\n';
+	for (const auto &[key, value] : parameters)
 	{
-		print_help();
+		std::cout << key << ": " << value << '\n';
 	}
 
-	parse_arguments(argc, argv);
-
-	vector<string> filenames;
+	std::vector<string> filenames;
 	E57<PtrXYZI> e57;
 	loadData(argc, argv, filenames);
 	// Check user input
 	if (filenames.empty())
 	{
-		cout << "Error checking files" << endl;
+		std::cout << "Error checking files\n";
 		return (-1);
 	}
 
@@ -60,13 +63,12 @@ int main(int argc, char **argv)
 	{
 		// Will be overwritten:
 		int64_t scanCount = 1;
-
 		for (int64_t scanIndex = 0; scanIndex < scanCount; ++scanIndex)
 		{
 			Eigen::Matrix4f matrix;
 			if (e57.openE57(filenames.at(i), cloud, scale_factor, scanCount, matrix, scanIndex) == -1)
 			{
-				cout << "Error reading file" << endl;
+				std::cout << "Error reading file\n";
 				return -1;
 			}
 
@@ -74,25 +76,25 @@ int main(int argc, char **argv)
 
 			std::stringstream ss;
 			ss << "Scan-" << i << "-" << scanIndex << ".pcd";
-			cout << ss.str() << endl;
+			std::cout << ss.str() << '\n';
 
 			pcl::io::savePCDFileASCII(ss.str(), *cloud_transformed);
 
 			//demonstration of writing down from PCD to E57
 			if (e57.saveE57File("test.e57", cloud, scale_factor) == -1)
 			{
-				cout << "Error saving in e57" << endl;
+				std::cout << "Error saving in e57\n";
 				return -1;
 			}
 
-			cout << "********************* CONVERSION COMPLETED *********************" << endl;
-			cout << "File: \t" << filenames.at(i) << endl;
-			cout << "Cloud Size: \t" << cloud.get()->size() << endl;
-			cout << "File Saved: \t" << ss.str() << endl;
-			cout << "********************* CONVERSION COMPLETED *********************" << endl;
+			std::cout << "********************* CONVERSION COMPLETED *********************\n";
+			std::cout << "File: \t" << filenames.at(i) << '\n';
+			std::cout << "Cloud Size: \t" << cloud.get()->size() << '\n';
+			std::cout << "File Saved: \t" << ss.str() << '\n';
+			std::cout << "********************* CONVERSION COMPLETED *********************\n";
 		}
 	}
 
-	cout << "Conversion completed" << endl;
+	std::cout << "Conversion completed\n";
 	return 0;
 }

@@ -54,11 +54,11 @@
 #define E57SIMPLE_H_INCLUDED
 
 #ifndef E57FOUNDATION_H_INCLUDED
-#include "E57Foundation.h"
+#include "e57/E57Foundation.h"
 #endif
 
 #ifndef _C_TIMECONV_H_
-#include "time_conversion.h"
+#include "e57/time_conversion.h"
 #endif
 
 using namespace std;
@@ -252,7 +252,7 @@ public:
 //! @brief This function clears all the data members of the E57Root class
 	void			Reset(void);
 
-	ustring			formatName;			//!< Contains the string “ASTM E57 3D Image File”
+	ustring			formatName;			//!< Contains the string ï¿½ASTM E57 3D Image Fileï¿½
 	ustring			guid;				//!< A globally unique identification string for the current version of the file
 	uint32_t		versionMajor;		//!< Major version number, should be 1
 	uint32_t		versionMinor;		//!< Minor version number, should be 0
@@ -286,7 +286,7 @@ public:
 
 class GroupingByLine {
 public:
-	ustring		idElementName;		//!< The name of the PointRecord element that identifies which group the point is in. The value of this string must be “rowIndex” or “columnIndex”
+	ustring		idElementName;		//!< The name of the PointRecord element that identifies which group the point is in. The value of this string must be ï¿½rowIndexï¿½ or ï¿½columnIndexï¿½
 	int64_t		groupsSize;			//!< Size of the groups compressedVector of LineGroupRecord structures
 	int64_t		pointCountSize;		//!< This is the size value for the e57::LineGroupRecord::pointCount.
 };
@@ -416,7 +416,7 @@ public:
 	ustring			sensorSoftwareVersion;	//!< The version number for the software used for the data collection.
 	ustring			sensorFirmwareVersion;	//!< The version number for the firmware installed in the sensor at the time of data collection.
 
-	float			temperature;			//!< The ambient temperature, measured at the sensor, at the time of data collection (in degrees Celsius). Shall be ? ?273.15° (absolute zero).
+	float			temperature;			//!< The ambient temperature, measured at the sensor, at the time of data collection (in degrees Celsius). Shall be ? ?273.15ï¿½ (absolute zero).
 	float			relativeHumidity;		//!< The percentage relative humidity, measured at the sensor, at the time of data collection. Shall be in the interval [0, 100].
 	float			atmosphericPressure;	//!< The atmospheric pressure, measured at the sensor, at the time of data collection (in Pascals). Shall be positive.
 
@@ -859,5 +859,5 @@ protected: //=================
 }; //end Writer class
 
 
-}; //end namespace
+} //end namespace
 #endif

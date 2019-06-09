@@ -2,7 +2,7 @@
 #-----------------------------
 # Project Settigs - TODO: Use ExternalProject_Add to get the package from SourceForge
 #-----------------------------
-project(libE57 VERSION 1.1.312 LANGUAGES CXX)
+project(libE57 VERSION 1.1.332 LANGUAGES CXX)
 
 
 message( STATUS "-------------------------------------------------------------------------------" )

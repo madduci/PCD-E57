@@ -60,7 +60,7 @@
 #define E57_INTERNAL_IMPLEMENTATION_ENABLE 1
 
 #ifndef E57SIMPLE_H_INCLUDED
-#  include "E57Simple.h"
+#  include "e57/E57Simple.h"
 #endif
 
 namespace e57 {

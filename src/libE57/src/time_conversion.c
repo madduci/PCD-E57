@@ -46,9 +46,9 @@ SUCH DAMAGE.
 #include <sys/timeb.h>
 #include <time.h>
 #include <math.h> /* for fmod() */
-#include "e57/gnss_error.h"
+#include "gnss_error.h"
 #include "e57/time_conversion.h"
-#include "e57/constants.h"
+#include "constants.h"
 
 #if 0
 #ifndef WIN32 
